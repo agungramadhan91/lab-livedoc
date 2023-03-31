@@ -14,6 +14,36 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/users', function(Request $request){
+    return new \Illuminate\Http\JsonResponse([
+        'data' => 'agung'
+    ]);
+});
+
+Route::get('/users/{id}', function(App\Models\User $id){
+    return new \Illuminate\Http\JsonResponse([
+        'data' => $id
+    ]);
+});
+
+Route::post('/users', function(){
+    return new \Illuminate\Http\JsonResponse([
+        'data' => "posted"
+    ]);
+});
+
+Route::patch('/users/{id}', function(App\Models\User $id){
+    return new \Illuminate\Http\JsonResponse([
+        'data' => "patched"
+    ]);
+});
+
+Route::delete('/users/{id}', function(App\Models\User $id){
+    return new \Illuminate\Http\JsonResponse([
+        'data' => "deleted"
+    ]);
+});
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
