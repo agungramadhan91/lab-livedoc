@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,36 +14,12 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-Route::get('/users', function(Request $request){
-    return new \Illuminate\Http\JsonResponse([
-        'data' => 'agung'
-    ]);
-});
-
-Route::get('/users/{id}', function(App\Models\User $id){
-    return new \Illuminate\Http\JsonResponse([
-        'data' => $id
-    ]);
-});
-
-Route::post('/users', function(){
-    return new \Illuminate\Http\JsonResponse([
-        'data' => "posted"
-    ]);
-});
-
-Route::patch('/users/{id}', function(App\Models\User $id){
-    return new \Illuminate\Http\JsonResponse([
-        'data' => "patched"
-    ]);
-});
-
-Route::delete('/users/{id}', function(App\Models\User $id){
-    return new \Illuminate\Http\JsonResponse([
-        'data' => "deleted"
-    ]);
-});
+// Route::apiResource('users', UserController::class);
+Route::get('/users', [UserController::class, 'index']);
+Route::post('/users', [UserController::class, 'store']);
+Route::get('/users/{id}', [UserController::class, 'show']);
+Route::patch('/users/{id}', [UserController::class, 'update']);
+Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
