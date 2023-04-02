@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Comment;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
+use \Illuminate\Http\Request;
+use \Illuminate\Http\JsonResponse;
+use Auth;
 
 class CommentController extends Controller
 {
@@ -15,7 +18,11 @@ class CommentController extends Controller
      */
     public function index()
     {
-        //
+        $comments = Comment::query()->get();
+
+        return new JsonResponse([
+            'data' => $comments
+        ]);
     }
 
     /**
@@ -24,9 +31,17 @@ class CommentController extends Controller
      * @param  \App\Http\Requests\StoreCommentRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreCommentRequest $request)
+    public function store(Request $request)
     {
-        //
+        $create_comment = Comment::query()->create([
+            "body"  => $request->body,
+            "post_id"   => $request->postId,
+            "user_id"   => Auth::id()
+        ]);
+
+        return new JsonResponse([
+            'data' => $create_comment
+        ]);
     }
 
     /**
@@ -37,7 +52,9 @@ class CommentController extends Controller
      */
     public function show(Comment $comment)
     {
-        //
+        return new JsonResponse([
+            'data' => $comment
+        ]);
     }
 
     /**
@@ -47,9 +64,23 @@ class CommentController extends Controller
      * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateCommentRequest $request, Comment $comment)
+    public function update(Request $request, Comment $comment)
     {
-        //
+        $update = $comment->update([
+            "body"      => $request->body ?? $comment->body,
+            // "post_id"   => $request->postId,
+            // "user_id"   => Auth::id()
+        ]);
+
+        if(!$update){
+            return new JsonResponse([
+                "error" => ["Failed to update!"]
+            ], 400);
+        }
+
+        return new JsonResponse([
+            'data' => $comment
+        ]);
     }
 
     /**
@@ -60,6 +91,16 @@ class CommentController extends Controller
      */
     public function destroy(Comment $comment)
     {
-        //
+        $delete = $comment->forceDelete();
+
+        if(!$delete){
+            return new JsonResponse([
+                "error" => ["Could not delete resource!"]
+            ], 400);
+        }
+
+        return new JsonResponse([
+            'data' => "succes"
+        ]);
     }
 }

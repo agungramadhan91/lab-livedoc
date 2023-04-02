@@ -13,7 +13,7 @@ Route::middleware([
     ->group(function(){
         Route::get('/comments', [CommentController::class, 'index'])->name('index');
         Route::post('/comments', [CommentController::class, 'store'])->name('store');
-        Route::get('/comments/{id}', [CommentController::class, 'show'])->name('show');
-        Route::patch('/comments/{id}', [CommentController::class, 'update'])->name('update');
-        Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('destroy');
+        Route::get('/comments/{comment}', [CommentController::class, 'show'])->name('show');
+        Route::patch('/comments/{comment}', [CommentController::class, 'update'])->name('update');
+        Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('destroy');
     });

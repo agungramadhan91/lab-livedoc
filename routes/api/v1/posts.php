@@ -13,7 +13,7 @@ Route::middleware([
     ->group(function(){
         Route::get('/posts', [PostController::class, 'index'])->name('index');
         Route::post('/posts', [PostController::class, 'store'])->name('store');
-        Route::get('/posts/{id}', [PostController::class, 'show'])->name('show');
-        Route::patch('/posts/{id}', [PostController::class, 'update'])->name('update');
-        Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('destroy');
+        Route::get('/posts/{post}', [PostController::class, 'show'])->name('show');
+        Route::patch('/posts/{post}', [PostController::class, 'update'])->name('update');
+        Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('destroy');
     });
