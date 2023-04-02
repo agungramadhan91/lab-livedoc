@@ -7,6 +7,7 @@ use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use \Illuminate\Http\Request;
 use \Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -32,10 +33,17 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        $create_post = Post::query()->create([
-            "title" => $request->title,
-            "body"  => $request->body
-        ]);
+        $create_post = DB::transaction(function() use ($request)
+        {
+            $create_post = Post::query()->create([
+                "title" => $request->title,
+                "body"  => $request->body
+            ]);
+
+            $create_post->users()->sync($request->userId);
+
+            return $create_post;
+        });
 
         return new JsonResponse([
             'data' => $create_post
@@ -64,10 +72,17 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        $update = $post->update([
-            "title" => $request->title ?? $post->title,
-            "body" => $request->body ?? $post->body,
-        ]);
+        $update = DB::transaction(function() use ($request, $post)
+        {
+            $update = $post->update([
+                "title" => $request->title ?? $post->title,
+                "body" => $request->body ?? $post->body,
+            ]);
+
+            $post->users()->sync($request->userId);
+
+            return $update;
+        });
 
         if(!$update){
             return new JsonResponse([
@@ -88,7 +103,13 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        $delete = $post->forceDelete();
+        $delete = DB::transaction(function() use ($post)
+        {
+            $post->users()->detach();
+            $delete = $post->forceDelete();
+
+            return $delete;
+        });
 
         if(!$delete){
             return new JsonResponse([

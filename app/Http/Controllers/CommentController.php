@@ -7,7 +7,7 @@ use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use \Illuminate\Http\Request;
 use \Illuminate\Http\JsonResponse;
-use Auth;
+use Illuminate\Support\Facades\DB;
 
 class CommentController extends Controller
 {
@@ -33,11 +33,16 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
-        $create_comment = Comment::query()->create([
-            "body"  => $request->body,
-            "post_id"   => $request->postId,
-            "user_id"   => Auth::id()
-        ]);
+        $create_comment = DB::transaction(function() use ($request)
+        {
+            $create_comment = Comment::query()->create([
+                "body"      => $request->body,
+                "user_id"   => $request->userId,
+                "post_id"   => $request->postId
+            ]);
+
+            return $create_comment;
+        });
 
         return new JsonResponse([
             'data' => $create_comment
@@ -66,11 +71,14 @@ class CommentController extends Controller
      */
     public function update(Request $request, Comment $comment)
     {
-        $update = $comment->update([
-            "body"      => $request->body ?? $comment->body,
-            // "post_id"   => $request->postId,
-            // "user_id"   => Auth::id()
-        ]);
+        $update = DB::transaction(function() use ($request, $comment)
+        {
+            $update = $comment->update([
+                "body" => $request->body ?? $comment->body,
+            ]);
+
+            return $update;
+        });
 
         if(!$update){
             return new JsonResponse([
@@ -91,7 +99,12 @@ class CommentController extends Controller
      */
     public function destroy(Comment $comment)
     {
-        $delete = $comment->forceDelete();
+        $delete = DB::transaction(function() use ($comment)
+        {
+            $delete = $comment->forceDelete();
+
+            return $delete;
+        });
 
         if(!$delete){
             return new JsonResponse([
