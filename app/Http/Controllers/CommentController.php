@@ -17,9 +17,10 @@ class CommentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $comments = Comment::query()->get();
+        $pageSize = $request->pageSize ?? 20;
+        $comments = Comment::query()->paginate($pageSize);
 
         return CommentResource::collection($comments);;
     }
@@ -54,7 +55,7 @@ class CommentController extends Controller
      */
     public function show(Comment $comment)
     {
-        return new CommentResource($comment)
+        return new CommentResource($comment);
     }
 
     /**

@@ -17,9 +17,10 @@ class PostController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $posts = Post::query()->get();
+        $pageSize = $request->pageSize ?? 20;
+        $posts = Post::query()->paginate($pageSize);
 
         return PostResource::collection($posts);
     }
