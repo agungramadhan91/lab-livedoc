@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Http\Resources\UserResource;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use \Illuminate\Http\Request;
 use \Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -19,9 +21,7 @@ class UserController extends Controller
     {
         $users = User::query()->get();
 
-        return new JsonResponse([
-            'data' => $users
-        ]);
+        return UserResource::collection($users);
     }
 
     /**
@@ -32,13 +32,19 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $create_user = User::query()->create([
-            "body"      => $request->body,
-        ]);
 
-        return new JsonResponse([
-            'data' => $create_user
-        ]);
+        $create_user = DB::transaction(function() use ($request)
+        {
+            $create_user = User::query()->create([
+                "name"      => $request->name,
+                "email"     => $request->email,
+                "password"  => $request->password,
+            ]);
+
+            return $create_user;
+        });
+
+        return new UserResource($create_user);
     }
 
     /**
@@ -49,9 +55,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return new JsonResponse([
-            'data' => $user
-        ]);
+        return new UserResource($user);
     }
 
     /**
@@ -63,9 +67,17 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $update = $user->update([
-            "body" => $request->body ?? $user->body,
-        ]);
+
+        $update = DB::transaction(function() use ($request, $user)
+        {
+            $update = $user->update([
+                "name"      => $request->name ?? $user->name,
+                "email"     => $request->email ?? $user->email,
+                "password"  => $request->password ?? $user->password,
+            ]);
+
+            return $update;
+        });
 
         if(!$update){
             return new JsonResponse([
@@ -73,9 +85,7 @@ class UserController extends Controller
             ], 400);
         }
 
-        return new JsonResponse([
-            'data' => $user
-        ]);
+        return new UserResource($update);
     }
 
     /**
